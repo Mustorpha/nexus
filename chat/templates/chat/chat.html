@@ -30,7 +30,7 @@
 
             var session_id = "885f20b8-a2dd-48a5-9b32-da6d08c7ef41"
             document.querySelector("#ws-id").textContent = session_id;
-            var ws = new WebSocket("ws://127.0.0.1:8000/ws/chat/");
+            var ws = new WebSocket("ws://100.25.14.108:8000/ws/chat/");
             ws.onmessage = function(event) {{
                 console.log(event)
                 showMessage(event.data)

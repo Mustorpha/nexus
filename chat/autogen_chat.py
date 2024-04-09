@@ -1,3 +1,5 @@
+from django.conf import settings
+
 from .user_proxy_webagent import UserProxyWebAgent
 from .groupchatweb import GroupChatManagerWeb
 
@@ -8,7 +10,7 @@ import autogen
 config_list = [
     {
         "model": "gpt-3.5-turbo",
-        "api_key": "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"
+        "api_key": settings.OPENAI_KEY,
     }
 ]
 llm_config = {
@@ -23,12 +25,23 @@ class AutogenChat():
         self.websocket = websocket
         self.client_sent_queue = asyncio.Queue()
 
-        self.assistant = autogen.AssistantAgent(
-            name="Harleesha",
-            system_message="You are a friendly and smart assistant",
+        self.researcher = autogen.AssistantAgent(
+            name="Researcher",
+            system_message="You are a researcher for a team, you will make research base on the discussion in your team.",
             llm_config=llm_config
         )
-        self.assistant.register_reply(
+        self.researcher.register_reply(
+            [autogen.Agent, None],
+            reply_func=self.print_messages,
+            config={"callback": None},
+        )
+
+        self.advisor = autogen.AssistantAgent(
+            name="Advisor",
+            system_message="You are an advisor for a team, you will make suggestion for the team base on the discussion in your team.",
+            llm_config=llm_config
+        )
+        self.advisor.register_reply(
             [autogen.Agent, None],
             reply_func=self.print_messages,
             config={"callback": None},
@@ -37,7 +50,6 @@ class AutogenChat():
         self.Admin = UserProxyWebAgent( 
             name="admin",
             human_input_mode="ALWAYS",
-            max_consecutive_auto_reply=5, 
             system_message="""You are the admin of a team, you will interact wisely with your members to solve the user's problem""",
             is_termination_msg=lambda x: x.get("content", "") and x.get("content", "").rstrip().endswith("TERMINATE"),
             code_execution_config=False,
@@ -48,8 +60,8 @@ class AutogenChat():
         if "callback" in config and config["callback"] is not None:
             callback = config["callback"]
             callback(sender, recipient, messages[-1])
-        message = messages[-1]["content"]
-        author = messages[-1]["name"]
+        message = messages[-1].get("content")
+        author = messages[-1].get("name", "Assistant")
         response = {
             "type": "send_message",
             "author": author,
@@ -59,13 +71,12 @@ class AutogenChat():
         return False, None     
 
     async def start(self, message):
-        self.groupchat = autogen.GroupChat(agents=[self.Admin, self.assistant], messages=[], max_round=10)
+        self.groupchat = autogen.GroupChat(agents=[self.Admin, self.researcher, self.advisor], messages=[], max_round=10)
         self.manager = GroupChatManagerWeb(groupchat=self.groupchat, 
             llm_config=llm_config,
             human_input_mode="ALWAYS" )
         await self.Admin.a_initiate_chat(
             self.manager,
-            clear_history=False,
             message=message
         )
 
