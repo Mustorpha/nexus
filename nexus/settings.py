@@ -48,6 +48,7 @@ DJANGO_APPS = [
 THIRD_PARTY_APPS = [
     "channels",
     "daphne",
+    "bokeh_django",
 ]
 
 LOCAL_APPS = [
@@ -154,4 +155,10 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # OPENAI API KEY
-OPENAI_KEY = os.getenv("OPENAI_KEY")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+#BOKEH APPS
+BOKEH_APPS = {
+        'bokeh_app': 'chat.bokeh_app',
+        }
+

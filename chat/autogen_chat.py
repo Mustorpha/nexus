@@ -10,7 +10,7 @@ import autogen
 config_list = [
     {
         "model": "gpt-3.5-turbo",
-        "api_key": settings.OPENAI_KEY,
+        "api_key": settings.OPENAI_API_KEY,
     }
 ]
 llm_config = {
