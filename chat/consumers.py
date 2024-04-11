@@ -1,5 +1,6 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 from datetime import datetime
+from django.conf import settings
 
 from .autogen_chat import AutogenChat
 
@@ -9,7 +10,7 @@ import os
 import asyncio
 import json
 
-openai.api_key = "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"
+openai.api_key = settings.OPENAI_API_KEY
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
