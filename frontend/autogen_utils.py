@@ -1,7 +1,10 @@
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+
 import asyncio
 import os
 import random
-import sys
 import textwrap
 import threading
 import time
@@ -70,8 +73,7 @@ def _is_termination_msg(message):
     cb = extract_code(message)
     contain_code = False
     for c in cb:
-        # todo: support more languages
-        if c[0] == "python":
+        if c[0] != "unknown":
             contain_code = True
             break
     return not contain_code
